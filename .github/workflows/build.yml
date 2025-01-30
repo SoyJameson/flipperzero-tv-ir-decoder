@@ -34,9 +34,8 @@ jobs:
         python3 -m pip install python-ulid
 
     - name: Setup FBT
-      working-directory: ./flipperzero-firmware
       run: |
-        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash
+        bash fbt.sh  # Ejecuta el script fbt.sh que has subido a tu repositorio
         source ~/.bashrc  # Asegura que el PATH esté actualizado
 
     - name: Compile FAP
