@@ -1,4 +1,4 @@
-name: Build TV Scanner
+name: Build TV IR Decoder
 
 on:
   push:
@@ -13,13 +13,19 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        submodules: true  # Asegura que se clonen los submódulos
 
     - name: Clone Flipper Firmware
       run: |
         git clone --recursive --branch dev https://github.com/flipperdevices/flipperzero-firmware.git
         mkdir -p flipperzero-firmware/applications_user/tv_ir_decoder
         cp -r applications/user/tv_ir_decoder/* flipperzero-firmware/applications_user/tv_ir_decoder/
-        cp -r assets/* flipperzero-firmware/assets/
+        if [ -d "assets" ]; then
+          cp -r assets/* flipperzero-firmware/assets/
+        else
+          echo "No assets directory found"
+        fi
 
     - name: Install Dependencies
       run: |
