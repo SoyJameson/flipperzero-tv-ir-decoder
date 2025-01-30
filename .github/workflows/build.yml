@@ -36,7 +36,7 @@ jobs:
     - name: Setup FBT Environment
       working-directory: ./flipperzero-firmware
       run: |
-        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash -s -- -b
+        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/fbt | bash -s -- -b
         source ~/.bashrc  # Asegura que el PATH esté actualizado
 
     - name: Compile FAP
