@@ -33,9 +33,10 @@ jobs:
         sudo apt-get install -y clang cmake protobuf-compiler git python3 python3-pip libssl-dev libusb-1.0-0-dev
         python3 -m pip install python-ulid
 
-    - name: Setup FBT
+    - name: Setup FBT Environment
+      working-directory: ./flipperzero-firmware
       run: |
-        bash fbt.sh  # Ejecuta el script fbt.sh que has subido a tu repositorio
+        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash -s -- -b
         source ~/.bashrc  # Asegura que el PATH esté actualizado
 
     - name: Compile FAP
