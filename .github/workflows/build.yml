@@ -24,9 +24,18 @@ jobs:
           .fbt/cache
         key: ${{ runner.os }}-fbt-cache-${{ hashFiles('Makefile') }}
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git wget curl build-essential python3-pip libssl-dev libusb-1.0-0-dev
+
+    - name: Download and setup FBT
+      run: |
+        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash
+
     - name: Build firmware
       run: |
-        ./fbt
+        ./fbt all
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
