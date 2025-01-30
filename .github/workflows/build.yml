@@ -1,44 +1,33 @@
-name: Build Flipper Zero Firmware
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
+name: Build TV Scanner
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Clone Flipper Firmware
+        run: |
+          git clone --recursive --branch dev https://github.com/flipperdevices/flipperzero-firmware.git
+          mkdir -p flipperzero-firmware/applications_user/tv_scanner
+          cp -r applications/tv_scanner/* flipperzero-firmware/applications_user/tv_scanner/
+          cp -r assets/tv_db flipperzero-firmware/assets/
 
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: |
-          .fbt/cache
-        key: ${{ runner.os }}-fbt-cache-${{ hashFiles('Makefile') }}
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake protobuf-compiler git python3 python3-pip
+          python3 -m pip install python-ulid
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git wget curl build-essential python3-pip libssl-dev libusb-1.0-0-dev
+      - name: Compile FAP
+        working-directory: ./flipperzero-firmware
+        run: |
+          ./fbt fap_tv_scanner
 
-    - name: Download and setup FBT
-      run: |
-        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash
-
-    - name: Build firmware
-      run: |
-        ./fbt all
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: firmware
-        path: build/f7/targets/f7-update.fap
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tv_scanner.fap
+          path: ./flipperzero-firmware/build/f7-firmware-D/.extapps/tv_scanner.fap
