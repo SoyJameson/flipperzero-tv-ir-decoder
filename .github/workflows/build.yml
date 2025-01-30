@@ -1,18 +1,43 @@
-name: Build Flipper Zero Firmware
+name: Build TV Scanner
 
 on:
   push:
     branches:
       - master
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-    - name: Run a simple command
-      run: echo "Hello, GitHub Actions!"
+    - name: Clone Flipper Firmware
+      run: |
+        git clone --recursive --branch dev https://github.com/flipperdevices/flipperzero-firmware.git
+        mkdir -p flipperzero-firmware/applications_user/tv_ir_decoder
+        cp -r applications/user/tv_ir_decoder/* flipperzero-firmware/applications_user/tv_ir_decoder/
+        cp -r assets/* flipperzero-firmware/assets/
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake protobuf-compiler git python3 python3-pip libssl-dev libusb-1.0-0-dev
+        python3 -m pip install python-ulid
+
+    - name: Download and setup FBT
+      run: |
+        curl -s https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/dev/scripts/fbt.sh | bash
+
+    - name: Compile FAP
+      working-directory: ./flipperzero-firmware
+      run: |
+        ./fbt fap_tv_ir_decoder
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tv_ir_decoder.fap
+        path: ./flipperzero-firmware/build/f7/targets/f7-update.fap
