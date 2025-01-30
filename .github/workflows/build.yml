@@ -1,0 +1,35 @@
+name: Build Flipper Zero Firmware
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          .fbt/cache
+        key: ${{ runner.os }}-fbt-cache-${{ hashFiles('Makefile') }}
+
+    - name: Build firmware
+      run: |
+        ./fbt
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: firmware
+        path: build/f7/targets/f7-update.fap
